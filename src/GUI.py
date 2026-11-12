@@ -22,19 +22,27 @@ class MyGui(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # 打开一个文件
     def openfile(self):
-        self.textEdit.clear()
-        filename, fp = QFileDialog.getOpenFileName(self, "选择文件", "","*.txt;;All Files(*)")
-        if fp:
+        filename, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "*.txt;;All Files(*)")
+        if not filename:
+            return
+
+        try:
             with open(filename, 'r') as f:
-                self.sourceCode = f.read()
-                self.SourceProgramText.setText(self.sourceCode)
-                # self.SourceProgramText.append("\n******\n")
-            self.BasicBlockDivisionButton.setEnabled(True)
-            self.LocalOptimizationButton.setEnabled(True)
-            self.DAGOptimization.setEnabled(True)
-            self.del_redundant_operations_btn.setEnabled(True)
-            self.del_unreferenced_var_btn.setEnabled(True)
-            self.merge_knowned_member_btn.setEnabled(True)
+                source_code = f.read()
+        except (OSError, UnicodeError) as error:
+            QMessageBox.warning(self, "打开文件失败", str(error))
+            return
+
+        self.sourceCode = source_code
+        self.basic_block = None
+        self.SourceProgramText.setPlainText(source_code)
+        self.textEdit.clear()
+        self.BasicBlockDivisionButton.setEnabled(True)
+        self.LocalOptimizationButton.setEnabled(True)
+        self.DAGOptimization.setEnabled(True)
+        self.del_redundant_operations_btn.setEnabled(True)
+        self.del_unreferenced_var_btn.setEnabled(True)
+        self.merge_knowned_member_btn.setEnabled(True)
 
     # 点击划分基本块按钮
     def click_B_B_D_Button(self):
